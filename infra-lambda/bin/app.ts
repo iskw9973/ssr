@@ -4,6 +4,7 @@ import * as cdk from "aws-cdk-lib";
 import * as path from "path";
 import { LambdaStack } from "../lib/stacks/lambda-stack";
 import { StaticAssetsStack } from "../lib/stacks/static-assets-stack";
+import { CdnWafStack } from "../lib/stacks/cdn-waf-stack";
 
 const app = new cdk.App();
 
@@ -15,14 +16,20 @@ const env: cdk.Environment = {
 
 const appOutputDir = path.join(__dirname, "../../app/.output");
 
-new LambdaStack(app, "SsrLambdaStack", {
+const lambdaStack = new LambdaStack(app, "SsrLambdaStack", {
   env,
   serverAssetPath: path.join(appOutputDir, "server"),
 });
 
-new StaticAssetsStack(app, "SsrStaticAssetsStack", {
+const staticAssetsStack = new StaticAssetsStack(app, "SsrStaticAssetsStack", {
   env,
   publicAssetPath: path.join(appOutputDir, "public"),
+});
+
+new CdnWafStack(app, "SsrCdnWafStack", {
+  env,
+  functionUrl: lambdaStack.functionUrl,
+  assetsBucket: staticAssetsStack.bucket,
 });
 
 app.synth();
