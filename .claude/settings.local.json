@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(*)",
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "Glob(*)",
+      "Grep(*)",
+      "WebFetch(*)",
+      "WebSearch(*)",
+      "NotebookEdit(*)",
+      "Task(*)",
+      "Skill(*)",
+      "mcp__ide__getDiagnostics(*)",
+      "mcp__ide__executeCode(*)",
+      "mcp__claude_ai_Cloudflare_Developer_Platform__*",
+      "Bash(GIT_SEQUENCE_EDITOR=true GIT_EDITOR=\"true\" git -C /Users/masamichi/Projects/ghq/github.com/iskw9973/ssr -c core.editor=true rebase --continue)",
+      "Bash(git -C /Users/masamichi/Projects/ghq/github.com/iskw9973/ssr diff --check)",
+      "Bash(git -C /Users/masamichi/Projects/ghq/github.com/iskw9973/ssr diff --cached --check)"
+    ]
+  }
+}
