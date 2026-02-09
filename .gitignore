@@ -32,3 +32,6 @@ docker/.env
 
 # jj
 .jj/**
+
+# Claude Code
+.claude
