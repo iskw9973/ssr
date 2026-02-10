@@ -1,0 +1,33 @@
+node_modules
+.output
+.nuxt
+dist
+.nitro
+.cache
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# CDK
+infra/cdk.out
+
+# Docker
+docker/.env
+
+# pnpm
+.pnpm-store
+
+# jj
+.jj/**

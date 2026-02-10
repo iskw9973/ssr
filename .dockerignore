@@ -1,0 +1,12 @@
+node_modules
+.git
+.jj
+.nuxt
+.output
+.cache
+dist
+infra/cdk.out
+infra/node_modules
+*.md
+.DS_Store
+.claude
