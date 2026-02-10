@@ -8,8 +8,20 @@ import { CdnWafStack } from "../lib/stacks/cdn-waf-stack";
 describe("CdnWafStack", () => {
   const app = new cdk.App();
 
-  // Create Lambda in a separate stack (no cyclic dependency with CdnWafStack)
-  const lambdaStack = new cdk.Stack(app, "TestLambdaStack");
+  const tokyoEnv: cdk.Environment = {
+    account: "123456789012",
+    region: "ap-northeast-1",
+  };
+  const usEast1Env: cdk.Environment = {
+    account: "123456789012",
+    region: "us-east-1",
+  };
+
+  // Create Lambda in a separate stack with Tokyo region
+  const lambdaStack = new cdk.Stack(app, "TestLambdaStack", {
+    env: tokyoEnv,
+    crossRegionReferences: true,
+  });
   const fn = new lambda.Function(lambdaStack, "Fn", {
     runtime: lambda.Runtime.NODEJS_20_X,
     handler: "index.handler",
@@ -20,9 +32,15 @@ describe("CdnWafStack", () => {
   });
 
   // Import bucket by name to avoid cyclic cross-stack references
-  const bucket = s3.Bucket.fromBucketName(lambdaStack, "ImportedBucket", "test-bucket");
+  const bucket = s3.Bucket.fromBucketName(
+    lambdaStack,
+    "ImportedBucket",
+    "test-bucket",
+  );
 
   const stack = new CdnWafStack(app, "TestCdnWafStack", {
+    env: usEast1Env,
+    crossRegionReferences: true,
     functionUrl,
     assetsBucket: bucket,
   });
@@ -90,12 +108,13 @@ describe("CdnWafStack", () => {
     });
   });
 
-  it("grants CloudFront permission to invoke the Lambda Function URL", () => {
-    template.hasResourceProperties("AWS::Lambda::Permission", {
-      Action: "lambda:InvokeFunctionUrl",
-      Principal: "cloudfront.amazonaws.com",
-      FunctionName: Match.anyValue(),
-      SourceArn: Match.anyValue(),
+  it("sets ALL_VIEWER_EXCEPT_HOST_HEADER origin request policy on default behavior", () => {
+    template.hasResourceProperties("AWS::CloudFront::Distribution", {
+      DistributionConfig: Match.objectLike({
+        DefaultCacheBehavior: Match.objectLike({
+          OriginRequestPolicyId: "b689b0a8-53d0-40ab-baf2-68738e2966ac",
+        }),
+      }),
     });
   });
 });

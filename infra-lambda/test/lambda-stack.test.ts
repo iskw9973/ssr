@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import * as cdk from "aws-cdk-lib";
-import { Template } from "aws-cdk-lib/assertions";
+import { Match, Template } from "aws-cdk-lib/assertions";
 import { LambdaStack } from "../lib/stacks/lambda-stack";
 import * as path from "path";
 
@@ -37,5 +37,14 @@ describe("LambdaStack", () => {
 
   it("creates exactly one Lambda function", () => {
     template.resourceCountIs("AWS::Lambda::Function", 1);
+  });
+
+  it("grants CloudFront OAC permission to invoke the Function URL", () => {
+    template.hasResourceProperties("AWS::Lambda::Permission", {
+      Action: "lambda:InvokeFunctionUrl",
+      FunctionName: Match.anyValue(),
+      Principal: "cloudfront.amazonaws.com",
+      SourceAccount: Match.anyValue(),
+    });
   });
 });

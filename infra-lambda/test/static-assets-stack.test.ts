@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import * as cdk from "aws-cdk-lib";
-import { Template } from "aws-cdk-lib/assertions";
+import { Match, Template } from "aws-cdk-lib/assertions";
 import { StaticAssetsStack } from "../lib/stacks/static-assets-stack";
 import * as path from "path";
 
@@ -34,5 +34,22 @@ describe("StaticAssetsStack", () => {
 
   it("creates a BucketDeployment (Custom::CDKBucketDeployment)", () => {
     template.resourceCountIs("Custom::CDKBucketDeployment", 1);
+  });
+
+  it("adds a bucket policy allowing CloudFront OAC access", () => {
+    template.hasResourceProperties("AWS::S3::BucketPolicy", {
+      PolicyDocument: Match.objectLike({
+        Statement: Match.arrayWith([
+          Match.objectLike({
+            Sid: "AllowCloudFrontOac",
+            Effect: "Allow",
+            Principal: {
+              Service: "cloudfront.amazonaws.com",
+            },
+            Action: "s3:GetObject",
+          }),
+        ]),
+      }),
+    });
   });
 });

@@ -24,5 +24,14 @@ export class LambdaStack extends cdk.Stack {
     this.functionUrl = this.fn.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.AWS_IAM,
     });
+
+    // Allow CloudFront OAC to invoke the Lambda Function URL.
+    // Uses sourceAccount (not sourceArn) to avoid circular dependency with the Distribution.
+    new lambda.CfnPermission(this, "CloudFrontOacPermission", {
+      action: "lambda:InvokeFunctionUrl",
+      functionName: this.fn.functionName,
+      principal: "cloudfront.amazonaws.com",
+      sourceAccount: this.account,
+    });
   }
 }

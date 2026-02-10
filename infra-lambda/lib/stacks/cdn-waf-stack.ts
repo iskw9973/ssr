@@ -62,16 +62,39 @@ export class CdnWafStack extends cdk.Stack {
       ],
     });
 
+    // Extract domain from Function URL (e.g. "https://xxx.lambda-url.ap-northeast-1.on.aws/")
+    const functionUrlDomain = cdk.Fn.select(
+      2,
+      cdk.Fn.split("/", props.functionUrl.url),
+    );
+
+    // Use HttpOrigin instead of FunctionUrlOrigin.withOriginAccessControl
+    // to work around CDK issue #34536 (cross-region Lambda Permission created in wrong region)
+    const lambdaOrigin = new origins.HttpOrigin(functionUrlDomain);
+
+    // Manual OAC for Lambda origin
+    const lambdaOac = new cloudfront.CfnOriginAccessControl(
+      this,
+      "LambdaOac",
+      {
+        originAccessControlConfig: {
+          name: `${this.stackName}-lambda-oac`,
+          originAccessControlOriginType: "lambda",
+          signingBehavior: "always",
+          signingProtocol: "sigv4",
+        },
+      },
+    );
+
     // CloudFront Distribution
     this.distribution = new cloudfront.Distribution(this, "Distribution", {
       defaultBehavior: {
-        origin:
-          origins.FunctionUrlOrigin.withOriginAccessControl(
-            props.functionUrl,
-          ),
+        origin: lambdaOrigin,
         viewerProtocolPolicy:
           cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
+        originRequestPolicy:
+          cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
       },
       additionalBehaviors: {
         "/_nuxt/*": {
@@ -86,5 +109,13 @@ export class CdnWafStack extends cdk.Stack {
       },
       webAclId: webAcl.attrArn,
     });
+
+    // Escape hatch: attach OAC to the Lambda origin (Origins.0 = defaultBehavior origin)
+    const cfnDist = this.distribution.node
+      .defaultChild as cloudfront.CfnDistribution;
+    cfnDist.addPropertyOverride(
+      "DistributionConfig.Origins.0.OriginAccessControlId",
+      lambdaOac.attrId,
+    );
   }
 }
