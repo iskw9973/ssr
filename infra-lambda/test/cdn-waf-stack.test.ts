@@ -16,7 +16,7 @@ describe("CdnWafStack", () => {
     code: lambda.Code.fromInline("exports.handler = () => {}"),
   });
   const functionUrl = fn.addFunctionUrl({
-    authType: lambda.FunctionUrlAuthType.NONE,
+    authType: lambda.FunctionUrlAuthType.AWS_IAM,
   });
 
   // Import bucket by name to avoid cyclic cross-stack references
@@ -77,6 +77,25 @@ describe("CdnWafStack", () => {
       DistributionConfig: Match.objectLike({
         WebACLId: Match.anyValue(),
       }),
+    });
+  });
+
+  it("creates an OAC for Lambda origin", () => {
+    template.hasResourceProperties("AWS::CloudFront::OriginAccessControl", {
+      OriginAccessControlConfig: Match.objectLike({
+        OriginAccessControlOriginType: "lambda",
+        SigningBehavior: "always",
+        SigningProtocol: "sigv4",
+      }),
+    });
+  });
+
+  it("grants CloudFront permission to invoke the Lambda Function URL", () => {
+    template.hasResourceProperties("AWS::Lambda::Permission", {
+      Action: "lambda:InvokeFunctionUrl",
+      Principal: "cloudfront.amazonaws.com",
+      FunctionName: Match.anyValue(),
+      SourceArn: Match.anyValue(),
     });
   });
 });

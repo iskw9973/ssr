@@ -22,7 +22,7 @@ export class LambdaStack extends cdk.Stack {
     });
 
     this.functionUrl = this.fn.addFunctionUrl({
-      authType: lambda.FunctionUrlAuthType.NONE,
+      authType: lambda.FunctionUrlAuthType.AWS_IAM,
     });
   }
 }

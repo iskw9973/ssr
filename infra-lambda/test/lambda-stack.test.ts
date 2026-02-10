@@ -29,9 +29,9 @@ describe("LambdaStack", () => {
     });
   });
 
-  it("creates a Function URL with AuthType NONE", () => {
+  it("creates a Function URL with AuthType AWS_IAM", () => {
     template.hasResourceProperties("AWS::Lambda::Url", {
-      AuthType: "NONE",
+      AuthType: "AWS_IAM",
     });
   });
 

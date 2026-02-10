@@ -62,23 +62,16 @@ export class CdnWafStack extends cdk.Stack {
       ],
     });
 
-    // Lambda Function URL origin
-    const functionUrlDomain = cdk.Fn.select(
-      2,
-      cdk.Fn.split("/", props.functionUrl.url),
-    );
-
     // CloudFront Distribution
     this.distribution = new cloudfront.Distribution(this, "Distribution", {
       defaultBehavior: {
-        origin: new origins.HttpOrigin(functionUrlDomain, {
-          protocolPolicy: cloudfront.OriginProtocolPolicy.HTTPS_ONLY,
-        }),
+        origin:
+          origins.FunctionUrlOrigin.withOriginAccessControl(
+            props.functionUrl,
+          ),
         viewerProtocolPolicy:
           cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
         cachePolicy: cloudfront.CachePolicy.CACHING_DISABLED,
-        originRequestPolicy:
-          cloudfront.OriginRequestPolicy.ALL_VIEWER_EXCEPT_HOST_HEADER,
       },
       additionalBehaviors: {
         "/_nuxt/*": {
