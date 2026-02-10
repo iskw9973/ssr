@@ -22,6 +22,7 @@ Thumbs.db
 
 # CDK
 infra/cdk.out
+infra-lambda/cdk.out
 
 # Docker
 docker/.env
@@ -31,3 +32,6 @@ docker/.env
 
 # jj
 .jj/**
+
+# Claude Code
+.claude

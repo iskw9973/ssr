@@ -40,3 +40,21 @@ graph TD
     EcsStack --> CodeDeployStack
     EcrStack --> PipelineStack
 ```
+
+## Lambda Function URL + CloudFront + WAF (infra-lambda/)
+
+```mermaid
+graph LR
+    Internet -->|HTTPS| CloudFront
+    CloudFront -->|default| Lambda[Lambda Function URL<br/>Nuxt 3 SSR]
+    CloudFront -->|/_nuxt/*| S3[S3 Bucket<br/>Static Assets]
+    WAF[WAF WebACL<br/>Rate Limit + Common Rules] --> CloudFront
+```
+
+### Infrastructure Stacks (infra-lambda/)
+
+```mermaid
+graph TD
+    LambdaStack --> CdnWafStack
+    StaticAssetsStack --> CdnWafStack
+```
