@@ -2,3 +2,5 @@ packages:
   - "app"
   - "infra"
   - "infra-lambda"
+  - "astro-app"
+  - "astro-lambda"
