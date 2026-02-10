@@ -13,6 +13,7 @@ export interface EcsStackProps extends cdk.StackProps {
 
 export class EcsStack extends cdk.Stack {
   public readonly service: ecs.FargateService;
+  public readonly alb: elbv2.ApplicationLoadBalancer;
   public readonly prodListener: elbv2.ApplicationListener;
   public readonly testListener: elbv2.ApplicationListener;
   public readonly blueTargetGroup: elbv2.ApplicationTargetGroup;
@@ -60,11 +61,13 @@ export class EcsStack extends cdk.Stack {
       },
     });
 
-    const alb = new elbv2.ApplicationLoadBalancer(this, "ALB", {
+    this.alb = new elbv2.ApplicationLoadBalancer(this, "ALB", {
       vpc: props.vpc,
       internetFacing: true,
       loadBalancerName: "ssr-alb",
     });
+
+    const alb = this.alb;
 
     this.blueTargetGroup = new elbv2.ApplicationTargetGroup(
       this,
@@ -102,13 +105,28 @@ export class EcsStack extends cdk.Stack {
 
     this.prodListener = alb.addListener("ProdListener", {
       port: 80,
+      open: false,
       defaultTargetGroups: [this.blueTargetGroup],
     });
 
     this.testListener = alb.addListener("TestListener", {
       port: 8080,
+      open: false,
       defaultTargetGroups: [this.greenTargetGroup],
     });
+
+    // Allow inbound only from CloudFront managed prefix list (origin bypass prevention)
+    const cfPrefixListId = ec2.Peer.prefixList("pl-58a04531"); // ap-northeast-1
+    alb.connections.securityGroups[0].addIngressRule(
+      cfPrefixListId,
+      ec2.Port.tcp(80),
+      "Allow CloudFront origin-facing",
+    );
+    alb.connections.securityGroups[0].addIngressRule(
+      cfPrefixListId,
+      ec2.Port.tcp(8080),
+      "Allow CloudFront origin-facing (test)",
+    );
 
     this.service = new ecs.FargateService(this, "Service", {
       cluster,

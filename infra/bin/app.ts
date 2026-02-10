@@ -6,25 +6,33 @@ import { EcrStack } from "../lib/stacks/ecr-stack";
 import { EcsStack } from "../lib/stacks/ecs-stack";
 import { CodeDeployStack } from "../lib/stacks/codedeploy-stack";
 import { PipelineStack } from "../lib/stacks/pipeline-stack";
+import { CdnWafStack } from "../lib/stacks/cdn-waf-stack";
 
 const app = new cdk.App();
 
-const env = {
-  account: process.env.CDK_DEFAULT_ACCOUNT,
-  region: process.env.CDK_DEFAULT_REGION ?? "ap-northeast-1",
-};
+const account = process.env.CDK_DEFAULT_ACCOUNT;
+const tokyoEnv: cdk.Environment = { account, region: "ap-northeast-1" };
+const usEast1Env: cdk.Environment = { account, region: "us-east-1" };
 
-const vpcStack = new VpcStack(app, "SsrVpcStack", { env });
-const ecrStack = new EcrStack(app, "SsrEcrStack", { env });
+const vpcStack = new VpcStack(app, "SsrVpcStack", {
+  env: tokyoEnv,
+  crossRegionReferences: true,
+});
+const ecrStack = new EcrStack(app, "SsrEcrStack", {
+  env: tokyoEnv,
+  crossRegionReferences: true,
+});
 
 const ecsStack = new EcsStack(app, "SsrEcsStack", {
-  env,
+  env: tokyoEnv,
+  crossRegionReferences: true,
   vpc: vpcStack.vpc,
   repository: ecrStack.repository,
 });
 
 new CodeDeployStack(app, "SsrCodeDeployStack", {
-  env,
+  env: tokyoEnv,
+  crossRegionReferences: true,
   ecsService: ecsStack.service,
   prodListener: ecsStack.prodListener,
   testListener: ecsStack.testListener,
@@ -33,8 +41,15 @@ new CodeDeployStack(app, "SsrCodeDeployStack", {
 });
 
 new PipelineStack(app, "SsrPipelineStack", {
-  env,
+  env: tokyoEnv,
+  crossRegionReferences: true,
   repository: ecrStack.repository,
+});
+
+new CdnWafStack(app, "SsrCdnWafStack", {
+  env: usEast1Env,
+  crossRegionReferences: true,
+  albDnsName: ecsStack.alb.loadBalancerDnsName,
 });
 
 app.synth();

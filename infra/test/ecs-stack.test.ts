@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import * as cdk from "aws-cdk-lib";
-import { Template } from "aws-cdk-lib/assertions";
+import { Template, Match } from "aws-cdk-lib/assertions";
 import { VpcStack } from "../lib/stacks/vpc-stack";
 import { EcrStack } from "../lib/stacks/ecr-stack";
 import { EcsStack } from "../lib/stacks/ecs-stack";
@@ -61,5 +61,37 @@ describe("EcsStack", () => {
       "AWS::ElasticLoadBalancingV2::TargetGroup",
       2
     );
+  });
+
+  it("allows ingress from CloudFront managed prefix list on port 80", () => {
+    template.hasResourceProperties("AWS::EC2::SecurityGroupIngress", {
+      IpProtocol: "tcp",
+      FromPort: 80,
+      ToPort: 80,
+      SourcePrefixListId: "pl-58a04531",
+    });
+  });
+
+  it("allows ingress from CloudFront managed prefix list on port 8080", () => {
+    template.hasResourceProperties("AWS::EC2::SecurityGroupIngress", {
+      IpProtocol: "tcp",
+      FromPort: 8080,
+      ToPort: 8080,
+      SourcePrefixListId: "pl-58a04531",
+    });
+  });
+
+  it("does not allow ingress from 0.0.0.0/0", () => {
+    const sgs = template.findResources("AWS::EC2::SecurityGroup");
+    for (const [, sg] of Object.entries(sgs)) {
+      const ingress = sg.Properties?.SecurityGroupIngress ?? [];
+      for (const rule of ingress) {
+        expect(rule.CidrIp).not.toBe("0.0.0.0/0");
+      }
+    }
+    const sgIngress = template.findResources("AWS::EC2::SecurityGroupIngress");
+    for (const [, rule] of Object.entries(sgIngress)) {
+      expect(rule.Properties?.CidrIp).not.toBe("0.0.0.0/0");
+    }
   });
 });
