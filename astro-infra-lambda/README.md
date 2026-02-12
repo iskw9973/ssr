@@ -1,4 +1,4 @@
-# astro-lambda
+# astro-infra-lambda
 
 Astro SSR を AWS Lambda + CloudFront + WAF でデプロイする CDK インフラ。
 
@@ -55,13 +55,13 @@ pnpm --filter astro-app build
 ### 2. CDK の TypeScript をビルド
 
 ```bash
-pnpm --filter astro-lambda build
+pnpm --filter astro-infra-lambda build
 ```
 
 ### 3. テスト
 
 ```bash
-pnpm --filter astro-lambda test
+pnpm --filter astro-infra-lambda test
 ```
 
 ### 4. CDK Bootstrap (初回のみ)
@@ -70,28 +70,28 @@ pnpm --filter astro-lambda test
 
 ```bash
 # 東京リージョン (Lambda + S3)
-pnpm --filter astro-lambda cdk bootstrap aws://<ACCOUNT_ID>/ap-northeast-1
+pnpm --filter astro-infra-lambda cdk bootstrap aws://<ACCOUNT_ID>/ap-northeast-1
 
 # バージニアリージョン (CloudFront + WAF)
-pnpm --filter astro-lambda cdk bootstrap aws://<ACCOUNT_ID>/us-east-1
+pnpm --filter astro-infra-lambda cdk bootstrap aws://<ACCOUNT_ID>/us-east-1
 ```
 
 ### 5. diff で変更を確認
 
 ```bash
-pnpm --filter astro-lambda cdk diff --all
+pnpm --filter astro-infra-lambda cdk diff --all
 ```
 
 ### 6. デプロイ
 
 ```bash
-pnpm --filter astro-lambda cdk deploy --all --require-approval broadening
+pnpm --filter astro-infra-lambda cdk deploy --all --require-approval broadening
 ```
 
 もしくはデプロイスクリプトでまとめて実行：
 
 ```bash
-./astro-lambda/deploy.sh
+./astro-infra-lambda/deploy.sh
 ```
 
 ### 7. 動作確認
@@ -106,13 +106,13 @@ curl https://<distribution-domain>/api/health
 ## 削除
 
 ```bash
-pnpm --filter astro-lambda cdk destroy --all
+pnpm --filter astro-infra-lambda cdk destroy --all
 ```
 
 ## ディレクトリ構成
 
 ```
-astro-lambda/
+astro-infra-lambda/
 ├── bin/app.ts                      # CDK エントリポイント
 ├── lib/stacks/
 │   ├── lambda-stack.ts             # Lambda + Function URL
