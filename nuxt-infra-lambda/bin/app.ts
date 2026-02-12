@@ -16,7 +16,7 @@ const tokyoEnv: cdk.Environment = { account, region: "ap-northeast-1" };
 // WAF (CLOUDFRONT scope) → us-east-1 required by AWS
 const usEast1Env: cdk.Environment = { account, region: "us-east-1" };
 
-const appOutputDir = path.join(__dirname, "../../app/.output");
+const appOutputDir = path.join(__dirname, "../../nuxt-app/.output");
 
 const lambdaStack = new LambdaStack(app, "SsrLambdaStack", {
   env: tokyoEnv,

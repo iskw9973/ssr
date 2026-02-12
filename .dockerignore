@@ -5,8 +5,8 @@ node_modules
 .output
 .cache
 dist
-infra/cdk.out
-infra/node_modules
+nuxt-infra-ecs/cdk.out
+nuxt-infra-ecs/node_modules
 *.md
 .DS_Store
 .claude
