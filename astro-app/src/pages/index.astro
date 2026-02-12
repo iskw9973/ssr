@@ -1,0 +1,11 @@
+---
+import Layout from "../layouts/Layout.astro";
+
+const renderedAt = new Date().toISOString();
+---
+
+<Layout title="Home">
+  <h1>Astro SSR on AWS Lambda</h1>
+  <p>This page is server-side rendered on every request.</p>
+  <p>Rendered at: <code>{renderedAt}</code></p>
+</Layout>

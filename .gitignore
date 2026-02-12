@@ -1,6 +1,7 @@
 node_modules
 .output
 .nuxt
+.astro
 dist
 .nitro
 .cache
@@ -23,6 +24,7 @@ Thumbs.db
 # CDK
 infra/cdk.out
 infra-lambda/cdk.out
+astro-lambda/cdk.out
 
 # Docker
 docker/.env

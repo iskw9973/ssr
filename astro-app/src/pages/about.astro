@@ -1,0 +1,15 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="About">
+  <h1>About</h1>
+  <p>Astro SSR application deployed on AWS Lambda with CloudFront and WAF.</p>
+  <h2>Architecture</h2>
+  <ul>
+    <li>SSR: AWS Lambda (ap-northeast-1)</li>
+    <li>Static Assets: S3 + CloudFront OAC</li>
+    <li>CDN: CloudFront (us-east-1)</li>
+    <li>Security: WAF v2 (Rate Limit + AWS Managed Rules)</li>
+  </ul>
+</Layout>
